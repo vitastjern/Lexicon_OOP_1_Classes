@@ -40,7 +40,7 @@ class SteamUser():
             return f"{self.username} bought {game}"
     
     def stats(self):
-        return f"{self.username} has {self.games_count} games. Total play time: {self.played_hours}"
+        return f"{self.username} has {self.games_count} games. Total play time: {self.played_hours} hours."
 
 
 user = SteamUser("Peter", ["Rainbow Six Siege", "CS:GO", "Fortnite"])

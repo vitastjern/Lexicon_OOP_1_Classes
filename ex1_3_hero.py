@@ -5,7 +5,7 @@
 #   -heal(amount) -     Increase the health of the hero with the given amount.
 #
 
-class Hero():
+class Hero:
     def __init__(self, name:str, health:int):
         self.name = name
         self.health = health
@@ -17,8 +17,8 @@ class Hero():
             self.health = 0
             return f'{self.name} was defeated'
         else:
-            return None
-            # I like the line below better as a return value compared to using None... ;)
+            return 
+            # I like the line below better as a return value compared to nothing... ;)
             # return f'{self.name} was hit with {damage} damage, their health is now at {self.health}'
     
     def heal(self, amount):
