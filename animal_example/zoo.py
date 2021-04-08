@@ -14,3 +14,6 @@ print(lizard1.get_name())
 print(gorilla1.get_name())
 print(bear1.get_name())
 print(snake1.get_name())
+
+# print(help(bear1))
+help(bear1)

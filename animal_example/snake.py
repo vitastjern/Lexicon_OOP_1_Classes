@@ -4,5 +4,5 @@ from reptile import Reptile
 
 class Snake(Reptile):
     def __init__(self, name):
-        self.name = name
+        super().__init__(name)
 
