@@ -30,15 +30,11 @@ class Deck:
             for y in SUITE:
                 self.the_deck.append(x+y) # 2H 3H 
         shuffle(self.the_deck)
-        #print(self.the_deck)  # [ '5D', 'AS', .. ]
-        #shuffle(self.the_deck)
-        #print(self.the_deck)
+
     
     def split(self):  # split the deck in 2 equal halves
         self.left = self.the_deck[:len(self.the_deck)//2]
         self.right = self.the_deck[len(self.the_deck)//2:]
-        #print("Left:", self.left)
-        #print("Right:", self.right)
 
 
 class Hand(Deck):
@@ -46,18 +42,18 @@ class Hand(Deck):
     # There should be an add and a remove card method here.
     hand = []
     def __init__(self, hand):
-        #print("Init the user's hand")
         self.hand = hand
-        #print(hand)
-        #print("This is the user's hand", self.hand)
 
     def add_card(self, cards):  # <desk> <put new cards here> AD 5S ... <top of pile>
         self.hand = cards + self.hand
 
     def remove_card(self):
-        self.hand.pop()   # cards are removed from the top (but added to the bottom)
+        self.hand.pop()   # card is removed from the top (but added to the bottom)
 
     def print_hand(self):
+        print(self.hand)
+
+    def get_hand(self):
         print(self.hand)
 
 
@@ -74,15 +70,27 @@ class Player(Hand):
         # when you play cards, you remove them from the hand and put them on the table
         # you need to know which cards you removed and save to your "table"-position
         # take the card from the top of the hand, put it at the bottom of the table stack
+        
         for _ in range(nr_of_cards):
             #print(self.name)
             self.table.append(self.hand[-1])   # add the last card in hand to the table stack
             self.remove_card()                 # remove the card from the hand
 
-    def cards_left(self):   # return True if cards left to play, else False
-        if self.hand == [] and self.table == []:
+    def has_cards_left(self):   # return True if cards left to play, else False
+        if self.nr_cards_on_hand() == 0:
             return False
         return True
+    
+    def has_cards_on_table(self):    # return true if there are cards on the table
+        if self.nr_cards_on_table() == 0:
+            return False
+        return True
+
+    def nr_cards_on_hand(self):
+        return len(self.hand)
+
+    def nr_cards_on_table(self):
+        return len(self.table)
 
     def rank_top_table(self):
         # return the rank of the player's top card on the table
@@ -105,33 +113,51 @@ deck = Deck()
 # our player's hands, one get the left part of the shuffled deck, the other the right
 deck.split()
 
-player1 = Player("Ryan", deck.left)
-player2 = Player("Stina", deck.right)
+player1 = Player(input("Give me player 1's name: "), deck.left)
+player2 = Player(input("Give me player 2's name: "), deck.right)
+#player1 = Player("Ryan", deck.left)
+#player2 = Player("Stina", deck.right)
 
-print("Player1 hand: ", player1.hand)
-print("\n")
-print("Player2 hand: ", player2.hand)
-print("\n")
+print(player1.name, "starting hand:", player1.hand, "\n")
+print(player2.name,"starting hand:", player2.hand,"\n")
 
 # Play the first set of cards
 player1.play_cards(1)
 player2.play_cards(1)
 
-print(player1.table)
-print(player2.table)
+# print(player1.table)
+# print(player2.table)
 
-#print(player1.rank_top_table(), player2.rank_top_table())
-'''player1.table = ["AD"]
-player2.table = ["AS"]'''
 
-while True: 
+round = 0
+while True:   # change back to True when we find the error
+    round += 1 
+    if round > 1000:
+        print("Game took too long, no winner!")
+        break
 
-    if player1.rank_top_table() == player2.rank_top_table():
+    if player1.rank_top_table() == player2.rank_top_table():   # war!
         print("WAR!")           # when we go to war, we play 3 cards from each hand
-        if player1.cards_left() and player2.cards_left():
-            player1.play_cards(3)
-            player2.play_cards(3)
-        print("Player 1 table:", player1.table, "\nPlayer2 table:", player2.table)
+        if player1.nr_cards_on_hand() < 3:  # if hand contains less than 3 cards, play those
+            tmp1 = player1.nr_cards_on_hand()
+        elif player1.nr_cards_on_hand() == 0:
+            tmp1 = 0
+        else:
+            tmp1 = 3
+
+        if player2.nr_cards_on_hand() < 3:
+            tmp2 = player2.nr_cards_on_hand()
+        elif player2.nr_cards_on_hand() == 0:
+            tmp2 = 0
+        else:
+            tmp2 = 3
+
+        for _ in range(tmp1): 
+            player1.play_cards(1)
+        for _ in range(tmp2):
+            player2.play_cards(1)
+
+        # print("Player 1 table:", player1.table, "\nPlayer2 table:", player2.table)
     else:
         if player1.rank_top_table() > player2.rank_top_table():
             print("Player1 gets player 2's cards")
@@ -140,23 +166,42 @@ while True:
             player1.add_card(player2.table)
             player1.empty_table()
             player2.empty_table()
-            print(player1.hand)
-            print(player2.hand)
+
         else:
             print("Player 2 gets the cards")
             player2.add_card(player1.table)
             player2.add_card(player2.table)
             player1.empty_table()
             player2.empty_table()
-            print(player1.hand)
-            print(player2.hand)
-        if player1.cards_left() and player2.cards_left():
+
+        if player1.has_cards_left():
             player1.play_cards(1)
+        if player2.has_cards_left():
             player2.play_cards(1)
-        else:
+
+    print("Round:", round)
+    print(player1.name, "hand:", player1.hand, "\nOn table:", player1.table) 
+    print(player2.name, "hand:", player2.hand, "\nOn table:", player2.table) 
+
+    # loss criteria: player has no cards on hand and no cards on the table
+    if not player1.has_cards_left():
+        if not player1.has_cards_on_table():
+            print(round, player2.name, "won!")
+            print(player1.name, player1.hand, player1.table)
+            print(player2.name, player2.hand, player2.table)
             break
-if player1.cards_left():
-    print(player1.name, "won!")
+
+    if not player2.has_cards_left():
+        if not player2.has_cards_on_table():
+            print(round, player1.name, "won!")
+            print(player1.name, player1.hand, player1.table)
+            print(player2.name, player2.hand, player2.table)
+            break
+
+
+    
+'''if player1.has_cards_left():
+    print(round, player1.name, "won!")
 else:
-    print(player2.name, "won!")
+    print(round, player2.name, "won!")'''
 
